@@ -19,4 +19,40 @@ class AppStyle {
       message: message,
     ));
   }
+
+  showAlertDialog(
+    BuildContext context, {
+    required Function() continueFun,
+    required String title,
+    required String message,
+  }) async {
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: const Text("Cancel"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+    Widget continueButton = TextButton(
+      child: const Text("Continue"),
+      onPressed: () {
+        Navigator.of(context).pop();
+        continueFun();
+      },
+    );
+    // show the dialog
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            cancelButton,
+            continueButton,
+          ],
+        );
+      },
+    );
+  }
 }

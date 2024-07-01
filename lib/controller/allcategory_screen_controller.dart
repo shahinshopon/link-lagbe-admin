@@ -1,18 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:get/state_manager.dart';
 import 'package:link_lagbe_update/const/custom_data_type.dart';
 import 'package:link_lagbe_update/ui/style/style.dart';
 import 'package:link_lagbe_update/widgets/custom_button.dart';
 import 'package:link_lagbe_update/widgets/custom_textfield.dart';
 
 class AllCategoryScreenController extends GetxController {
-  DocumentSnapshot? snapshotData;
+  // DocumentSnapshot? snapshotData;
   RxBool isLoading = false.obs;
   List<Map<String, String>> categories = [];
   RxString dropdownVal = "".obs;
   RxString docId = "".obs;
+  RxBool isSubcategory = true.obs;
   Rx<AddingDataType> addingDataTypeGrpVal = AddingDataType.categories.obs;
+  RxBool dataLinkGroupValue = false.obs;
   final TextEditingController categoryNameController = TextEditingController();
   final TextEditingController categoryUrlController = TextEditingController();
   final TextEditingController blogUrlController = TextEditingController();
@@ -35,6 +41,7 @@ class AllCategoryScreenController extends GetxController {
       docId.value = categories.first["docId"]!;
       isLoading.value = false;
     } catch (e) {
+      AppStyle().failedSnakBar(e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -66,70 +73,135 @@ class AllCategoryScreenController extends GetxController {
                   ])),
                   //added data type
                   Obx(
-                    () => ListView(
-                      shrinkWrap: true,
-                      children: [
-                        ListTile(
-                          title: const Text("Categories"),
-                          leading: Radio(
-                            value: AddingDataType.categories,
-                            groupValue: addingDataTypeGrpVal.value,
-                            onChanged: (value) {
-                              addingDataTypeGrpVal.value =
-                                  AddingDataType.categories;
-                            },
+                    () => isSubcategory.value == true
+                        ? ListView(
+                            shrinkWrap: true,
+                            children: [
+                              ListTile(
+                                title: const Text("Categories"),
+                                leading: Radio(
+                                  value: AddingDataType.categories,
+                                  groupValue: addingDataTypeGrpVal.value,
+                                  onChanged: (value) {
+                                    addingDataTypeGrpVal.value =
+                                        AddingDataType.categories;
+                                  },
+                                ),
+                              ),
+                              ListTile(
+                                title: const Text("Blog"),
+                                leading: Radio(
+                                  value: AddingDataType.blog,
+                                  groupValue: addingDataTypeGrpVal.value,
+                                  onChanged: (value) {
+                                    addingDataTypeGrpVal.value =
+                                        AddingDataType.blog;
+                                  },
+                                ),
+                              ),
+                              ListTile(
+                                title: const Text("Video"),
+                                leading: Radio(
+                                  value: AddingDataType.video,
+                                  groupValue: addingDataTypeGrpVal.value,
+                                  onChanged: (value) {
+                                    addingDataTypeGrpVal.value =
+                                        AddingDataType.video;
+                                  },
+                                ),
+                              ),
+                            ],
+                          )
+                        : Column(
+                            children: [
+                              ListTile(
+                                title: const Text("Data"),
+                                leading: Radio(
+                                  value: AddingDataType.data,
+                                  groupValue: addingDataTypeGrpVal.value,
+                                  onChanged: (value) {
+                                    addingDataTypeGrpVal.value =
+                                        AddingDataType.data;
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        ListTile(
-                          title: const Text("Blog"),
-                          leading: Radio(
-                            value: AddingDataType.blog,
-                            groupValue: addingDataTypeGrpVal.value,
-                            onChanged: (value) {
-                              addingDataTypeGrpVal.value = AddingDataType.blog;
-                            },
-                          ),
-                        ),
-                        ListTile(
-                          title: const Text("Video"),
-                          leading: Radio(
-                            value: AddingDataType.video,
-                            groupValue: addingDataTypeGrpVal.value,
-                            onChanged: (value) {
-                              addingDataTypeGrpVal.value = AddingDataType.video;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
 
                   Obx(
-                    () =>
-                        addingDataTypeGrpVal.value == AddingDataType.categories
+                    () => addingDataTypeGrpVal.value ==
+                            AddingDataType.categories
+                        ? Column(
+                            children: [
+                              customFormField(categoryNameController, context,
+                                  "Category Name", (val) {}),
+                              customFormField(categoryUrlController, context,
+                                  "URL", (val) {}),
+                            ],
+                          )
+                        : addingDataTypeGrpVal.value == AddingDataType.blog
                             ? Column(
                                 children: [
                                   customFormField(categoryNameController,
                                       context, "Category Name", (val) {}),
-                                  customFormField(categoryUrlController,
-                                      context, "URL", (val) {}),
+                                  customFormField(blogUrlController, context,
+                                      "BLOG URL", (val) {}),
                                 ],
                               )
-                            : addingDataTypeGrpVal.value == AddingDataType.blog
+                            : addingDataTypeGrpVal.value == AddingDataType.video
                                 ? Column(
-                                    children: [
-                                      customFormField(categoryNameController,
-                                          context, "Category Name", (val) {}),
-                                      customFormField(blogUrlController,
-                                          context, "BLOG URL", (val) {}),
-                                    ],
-                                  )
-                                : Column(
                                     children: [
                                       customFormField(categoryNameController,
                                           context, "Category Name", (val) {}),
                                       customFormField(videoUrlController,
                                           context, "VIDEO URL", (val) {}),
+                                    ],
+                                  )
+                                : Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Text("Data Link"),
+                                          Flexible(
+                                            flex: 1,
+                                            child: ListTile(
+                                              title: const Text("True"),
+                                              leading: Radio(
+                                                groupValue:
+                                                    dataLinkGroupValue.value,
+                                                value: true,
+                                                onChanged: (value) {
+                                                  dataLinkGroupValue.value =
+                                                      true;
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                          Flexible(
+                                            flex: 1,
+                                            child: ListTile(
+                                              title: const Text("False"),
+                                              leading: Radio(
+                                                groupValue:
+                                                    dataLinkGroupValue.value,
+                                                value: false,
+                                                onChanged: (value) {
+                                                  dataLinkGroupValue.value =
+                                                      false;
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                          Flexible(flex: 3, child: Container())
+                                        ],
+                                      ),
+                                      customFormField(categoryNameController,
+                                          context, "Data title", (val) {}),
+                                      customFormField(videoUrlController,
+                                          context, "Data value", (val) {}),
                                     ],
                                   ),
                   ),
@@ -172,11 +244,11 @@ class AllCategoryScreenController extends GetxController {
                               blogUrlController.text.isNotEmpty) {
                             Map<String, dynamic> data = {
                               "category-name": categoryNameController.text,
-                              "blog-url": ""
+                              "blog-url": blogUrlController.text
                             };
                             try {
                               await FirebaseFirestore.instance
-                                  .collection("")
+                                  .collection("all-categories")
                                   .doc(docId.value)
                                   .update({
                                 "doc-list": FieldValue.arrayUnion([data])
@@ -195,11 +267,11 @@ class AllCategoryScreenController extends GetxController {
                               videoUrlController.text.isNotEmpty) {
                             Map<String, dynamic> data = {
                               "category-name": categoryNameController.text,
-                              "video-url": ""
+                              "video-url": videoUrlController.text
                             };
                             try {
                               await FirebaseFirestore.instance
-                                  .collection("")
+                                  .collection("all-categories")
                                   .doc(docId.value)
                                   .update({
                                 "doc-list": FieldValue.arrayUnion([data])
@@ -221,5 +293,34 @@ class AllCategoryScreenController extends GetxController {
                 ],
               ),
             ));
+  }
+
+//delete blog or video  item
+  void deleteItem(String collectionName, String docId, String fieldName,
+      dynamic removeData) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection(collectionName)
+          .doc(docId)
+          .update({
+        fieldName: FieldValue.arrayRemove([removeData])
+      }).whenComplete(() => AppStyle().successSnakBar("successfully removed"));
+    } catch (e) {
+      AppStyle().failedSnakBar(e.toString());
+    }
+  }
+
+  //delete a category item
+  void deleteCategory(String collectionName, String docId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection(collectionName)
+          .doc(docId)
+          .delete()
+          .whenComplete(
+              () => AppStyle().successSnakBar("Successfully deleted"));
+    } catch (e) {
+      AppStyle().failedSnakBar(e.toString());
+    }
   }
 }

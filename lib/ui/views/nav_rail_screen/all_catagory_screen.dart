@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/state_manager.dart';
 import 'package:link_lagbe_update/controller/allcategory_screen_controller.dart';
+import 'package:link_lagbe_update/ui/style/style.dart';
 import 'package:link_lagbe_update/ui/views/nav_rail_screen/details_screen.dart';
 
 class AllCategoryScreen extends StatefulWidget {
@@ -63,7 +64,9 @@ class _AllCategoryScreenState extends State<AllCategoryScreen> {
                                   return const Center(
                                     child: CircularProgressIndicator(),
                                   );
-                                } else {
+                                } else if (snapshot.hasData) {
+                                  controller.isSubcategory.value =
+                                      snapshot.data!["sub-category"];
                                   return SingleChildScrollView(
                                     child: Column(
                                       children: [
@@ -125,6 +128,130 @@ class _AllCategoryScreenState extends State<AllCategoryScreen> {
                                                                       [index]
                                                                       ["video-url"]
                                                                   .toString()),
+                                                      trailing: !snapshot
+                                                              .data!["doc-list"]
+                                                                  [index]
+                                                              .containsKey(
+                                                                  "all-data")
+                                                          ? IconButton(
+                                                              onPressed: () {
+                                                                Map<String,
+                                                                        dynamic>
+                                                                    removeBlogData =
+                                                                    {
+                                                                  "blog-url": snapshot
+                                                                              .data!["doc-list"]
+                                                                          [
+                                                                          index]
+                                                                      [
+                                                                      "blog-url"],
+                                                                  "category-name":
+                                                                      snapshot.data!["doc-list"]
+                                                                              [
+                                                                              index]
+                                                                          [
+                                                                          "category-name"]
+                                                                };
+                                                                Map<String,
+                                                                        dynamic>
+                                                                    removeVideoData =
+                                                                    {
+                                                                  "video-url": snapshot
+                                                                              .data!["doc-list"]
+                                                                          [
+                                                                          index]
+                                                                      [
+                                                                      "video-url"],
+                                                                  "category-name":
+                                                                      snapshot.data!["doc-list"]
+                                                                              [
+                                                                              index]
+                                                                          [
+                                                                          "category-name"]
+                                                                };
+
+                                                                AppStyle().showAlertDialog(
+                                                                    context,
+                                                                    continueFun:
+                                                                        () {
+                                                                  snapshot.data![
+                                                                              "doc-list"]
+                                                                              [
+                                                                              index]
+                                                                          .containsKey(
+                                                                              "blog-url")
+                                                                      ? controller.deleteItem(
+                                                                          "all-categories",
+                                                                          controller
+                                                                              .docId
+                                                                              .value,
+                                                                          "doc-list",
+                                                                          removeBlogData)
+                                                                      : controller.deleteItem(
+                                                                          "all-categories",
+                                                                          controller
+                                                                              .docId
+                                                                              .value,
+                                                                          "doc-list",
+                                                                          removeVideoData);
+                                                                },
+                                                                    title:
+                                                                        "Alert",
+                                                                    message:
+                                                                        "Do you want to delete the item?");
+                                                              },
+                                                              icon: const Icon(Icons
+                                                                  .delete_outline))
+                                                          : snapshot
+                                                                      .data![
+                                                                          "doc-list"]
+                                                                          [
+                                                                          index]
+                                                                          [
+                                                                          "all-data"]
+                                                                      .length ==
+                                                                  0
+                                                              ? IconButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    Map<String,
+                                                                            dynamic>
+                                                                        removeData =
+                                                                        {
+                                                                      "all-data":
+                                                                          [],
+                                                                      "category-name":
+                                                                          snapshot.data!["doc-list"][index]
+                                                                              [
+                                                                              "category-name"],
+                                                                      "url": snapshot.data!["doc-list"]
+                                                                              [
+                                                                              index]
+                                                                          [
+                                                                          "url"],
+                                                                    };
+                                                                    AppStyle().showAlertDialog(
+                                                                        context,
+                                                                        continueFun:
+                                                                            () {
+                                                                      controller.deleteItem(
+                                                                          "all-categories",
+                                                                          controller
+                                                                              .docId
+                                                                              .value,
+                                                                          "doc-list",
+                                                                          removeData);
+                                                                    },
+                                                                        title:
+                                                                            "Delete",
+                                                                        message:
+                                                                            "Do you want to delte the folder");
+                                                                  },
+                                                                  icon: const Icon(
+                                                                      Icons
+                                                                          .folder_delete_outlined),
+                                                                )
+                                                              : const SizedBox(),
                                                     ),
                                                   ),
                                                 );
@@ -152,8 +279,13 @@ class _AllCategoryScreenState extends State<AllCategoryScreen> {
                                       ],
                                     ),
                                   );
+                                } else {
+                                  return const CircularProgressIndicator();
                                 }
                               }),
+                        ),
+                        const SizedBox(
+                          height: 50,
                         )
                       ],
                     ),

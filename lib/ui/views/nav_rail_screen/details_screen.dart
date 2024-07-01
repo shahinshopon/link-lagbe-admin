@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:link_lagbe_update/ui/style/style.dart';
 import 'package:link_lagbe_update/widgets/show_dialog.dart';
 
 class DetailsScreen extends StatefulWidget {
@@ -42,16 +43,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   subtitle: Text(widget.data[index]["data-value"]),
                   trailing: IconButton(
                       onPressed: () {
-                        _dataTitleController.text =
-                            widget.data[index]["data-title"];
-                        _dataValueController.text =
-                            widget.data[index]["data-value"];
-                        dataLinkGroupValue =
-                            widget.data[index]["data-link"].toString();
-                        customDialog(context, _dataTitleController,
-                            _dataValueController, dataLinkGroupValue);
+                        AppStyle().showAlertDialog(context,
+                            continueFun: () {},
+                            title: "Delete",
+                            message: "Do you want to delete the item?");
                       },
-                      icon: const Icon(Icons.edit_document)),
+                      icon: const Icon(Icons.delete_outline)),
                 );
               },
             )

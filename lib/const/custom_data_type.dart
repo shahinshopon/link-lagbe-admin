@@ -1,1 +1,1 @@
-enum AddingDataType { categories, blog, video }
+enum AddingDataType { categories, blog, video, data }
